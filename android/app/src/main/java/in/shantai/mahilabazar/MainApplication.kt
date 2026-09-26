@@ -1,4 +1,6 @@
-package com.siddharam_sutar.mywebviewapp
+// `in` is a Kotlin keyword, so it is escaped here. The Android application id,
+// in.shantai.mahilabazar, needs no escaping (android/app/build.gradle).
+package `in`.shantai.mahilabazar
 
 import android.app.Application
 import android.content.res.Configuration

@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.siddharam_sutar.mywebviewapp'
+    namespace 'in.shantai.mahilabazar'
     defaultConfig {
-        applicationId 'com.siddharam_sutar.mywebviewapp'
+        applicationId 'in.shantai.mahilabazar'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

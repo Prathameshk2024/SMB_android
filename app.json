@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "शांताई महिला बाजार",
-    "slug": "my-webview-app",
+    "slug": "shantai-mahila-bazar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mywebviewapp",
+    "scheme": "shantaimahilabazar",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
@@ -17,7 +17,7 @@
         "backgroundColor": "#FAEBD6"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.siddharam_sutar.mywebviewapp",
+      "package": "in.shantai.mahilabazar",
       "permissions": [
         "CAMERA",
         "INTERNET",

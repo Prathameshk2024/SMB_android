@@ -14,8 +14,8 @@ confirm, not settled fact — every claim names the line it came from.
   `https://shantai-mahila-bajar-app-frontend.vercel.app/` (`SITE_URL`, line 54).
 - Nothing of the site is bundled in. A Vercel deploy of the web app is an APK
   update; the APK is rebuilt only when the wrapper itself changes.
-- Package name `com.siddharam_sutar.mywebviewapp` (cannot change after the first
-  Play upload). Expo SDK 54, React Native 0.81, `react-native-webview` 13.16,
+- Package name `in.shantai.mahilabazar` (cannot change after the first Play
+  upload; it replaced `com.siddharam_sutar.mywebviewapp` on 27 September 2026). Expo SDK 54, React Native 0.81, `react-native-webview` 13.16,
   `expo-notifications` 0.32. `android/` is committed (prebuilt).
 - The web app, API and all business rules live in the other repo. Its
   `CLAUDE.md` ("Deployment shape") and `docs/DEPLOY.md` §6 describe this wrapper.
@@ -177,8 +177,18 @@ in `ea8689a`: the load-error screen took half the height and Android's English
   (`default_notification_channel_id` in the manifest).
 - **A new web route** that should reopen after a restart must be added to
   `RESTORABLE_ROUTES`; everything else is excluded by default.
-- **Package name** `com.siddharam_sutar.mywebviewapp` is permanent after the
-  first Play upload.
+- **Package name** `in.shantai.mahilabazar` is permanent after the first Play
+  upload. `in` is a Kotlin keyword, so `MainActivity.kt` and
+  `MainApplication.kt` declare ``package `in`.shantai.mahilabazar``. A
+  `prebuild --clean` would regenerate them unescaped and break the build —
+  one more reason never to run it.
+- **`google-services.json` must list `in.shantai.mahilabazar`** (both copies:
+  the root one and `android/app/`). Register the Android app under that name
+  in the `shantaimahilabajar` Firebase project and download the file again;
+  the old file names only the old package, and the build fails without a
+  match. After a package rename, delete `android/app/build/generated/autolinking`
+  and `android/build/generated/autolinking`, or the cached entry point still
+  imports the old package's `BuildConfig`.
 - `versionCode` is `1` in `android/app/build.gradle`; each Play upload needs
   it raised.
 - Any location permission coming back (e.g. through a new library) means a
