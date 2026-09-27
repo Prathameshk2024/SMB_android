@@ -16,6 +16,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FAEBD6"
       },
+      "allowBackup": false,
       "edgeToEdgeEnabled": true,
       "package": "in.shantai.mahilabazar",
       "permissions": [

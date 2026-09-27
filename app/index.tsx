@@ -393,7 +393,7 @@ export default function AppScreen() {
         style={styles.webview}
         javaScriptEnabled
         domStorageEnabled
-        mixedContentMode="always"
+        mixedContentMode="never"
         originWhitelist={['*']}
         thirdPartyCookiesEnabled
         sharedCookiesEnabled
