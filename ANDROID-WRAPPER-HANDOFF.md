@@ -15,8 +15,10 @@ them.
   `app-release.aab` was built on 28 September at 04:19, **after** `6be6235`,
   so it contains every fix above. Not uploaded to Play yet.
 - The Play Console answers are ready in `PLAY-CONSOLE-FILL.md`. What blocks
-  submission is mostly web-app work (reviewer account, privacy rows); see
-  *Still to do*.
+  submission is web-side setup (reviewer account, privacy rows); see
+  *Still to do*. The web app's Play fixes, including the eight bugs in
+  `TEAM-HANDOFF.md` §3, are live on Vercel and Cloud Run.
+- Wrapper changes planned for later releases: `ANDROID-FUTURE-RELEASES.md`.
 
 ## What this project is
 
@@ -184,27 +186,17 @@ same commit gives an APK to test with.
 
 ## Still to do
 
-1. **Upload the `.aab` to closed testing** (`versionCode 1`, `1.0.0`) and run
+1. **Re-run the phone checklist** below on a build with the new package name,
+   and check its permissions (`aapt dump permissions`, see `README.md`).
+2. **Upload the `.aab` to closed testing** (`versionCode 1`, `1.0.0`) and run
    Play's 12-tester, 14-day test if the account needs it. Field-by-field
    answers: `PLAY-CONSOLE-FILL.md`. Its section 0 lists the web-side blockers
-   (reviewer account and demo OTP, remaining privacy rows, backend deploy).
-2. **Before or with the next build**, the rest of the web review's
-   "Android wrapper" list (`docs/PLAY-READINESS-REVIEW.md`, *Should fix*):
-   - Add `<uses-feature android:name="android.hardware.camera"
-     android:required="false"/>` and the same for
-     `android.hardware.microphone`. Without them Play treats both as required
-     and hides the app from phones without a camera or mic.
-   - Open https links to other sites in the phone's browser, not inside the
-     WebView, where the only way out is Back (`onShouldStartLoadWithRequest`
-     returns `true` for every https URL today).
-   - Drop `console.log('Intercepted URL…')` and the other logging from
-     release builds.
-   - The loading spinners are blue (`#2196F3`); use the brand maroon
-     `#7b1e2e`.
-
-   Each is a new upload, so raise `versionCode` then.
-3. **Re-run the phone checklist** below on a build with the new package name,
-   and check its permissions (`aapt dump permissions`, see `README.md`).
+   (reviewer account and demo OTP, remaining privacy rows).
+3. **Next update (1.0.1):** the rest of the web review's "Android wrapper"
+   list. That covers marking camera and mic as not required, opening other
+   websites in the browser, no debug logging in release builds, and the brand
+   spinner colour. None blocks review. Each is written up, with the release
+   steps, in `ANDROID-FUTURE-RELEASES.md`.
 
 ## Keep in mind
 

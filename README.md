@@ -30,6 +30,8 @@ The web app, its API and all business rules live in a separate repo,
 - [ANDROID-WRAPPER-HANDOFF.md](ANDROID-WRAPPER-HANDOFF.md): how the wrapper works, the push handshake
   with the web app, permissions, status, what is left, and the rules not to break.
 - [PLAY-CONSOLE-FILL.md](PLAY-CONSOLE-FILL.md): every Play Console field, screen by screen, ready to paste.
+- [ANDROID-FUTURE-RELEASES.md](ANDROID-FUTURE-RELEASES.md): wrapper changes planned for later versions
+  (1.0.1 and beyond), and how to ship one.
 - [debug-download.md](debug-download.md): the download safety net.
 
 ## Run it in development

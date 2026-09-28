@@ -13,20 +13,29 @@ Site: `https://shantai-mahila-bajar-app-frontend.vercel.app`
 - **Signing: done.** The `.aab` built on 2026-09-28 is signed with the upload key (`CN=Team Zenith`, SHA-256
   `70:5C:39:…:A7:EA`), not the debug key. Keep a backup of the keystore and its passwords; losing them means
   asking Play support for an upload-key reset.
-- **⚠ Reviewer account.** Set up the demo shop, products and sample orders. Then change the MSG91 demo OTP to
-  a random 6-digit code. The checklist is in `PLAY-READINESS-REVIEW.md` → "Production data to prepare".
+- **⚠ Reviewer account.** Two numbers are MSG91 Demo Credentials (no SMS is sent to either): `9579642050`
+  and `9999999999` (web `86e89e6`, `03bd22a`). `9999999999` is refused by a check outside the web repo, so test
+  a sign-in with it before choosing it; `9579642050` was tested end to end on 27 Sep. Pick **one**, then:
+  - set up the demo shop, products and sample orders under it;
+  - change the MSG91 demo OTP to a random 6-digit code;
+  - use that number throughout §4 *App access*.
+
+  The checklist is in `PLAY-READINESS-REVIEW.md` → "Production data to prepare". The API must include
+  `03bd22a` for both numbers to count as demo numbers; redeploy if unsure.
 - **Wrapper fixes: done and in the `.aab`.** `android:allowBackup="false"` (AndroidManifest, and `app.json` so a
   prebuild keeps it) and `mixedContentMode="never"` (`app/index.tsx`) landed in `6be6235` at 02:58. The `.aab` was
   built after that, at 04:19, so it already has them. The web review's other wrapper items (`uses-feature`
-  camera/mic not required, outside links in the browser, release logging, spinner colour) are still open. They
-  don't block review, and they can go in the next build (see the handoff's *Still to do*).
-- **Privacy promises: partly fixed, needs a deploy.** Done in code: a closed seller's listings and photos are
+  camera/mic not required, outside links in the browser, release logging, spinner colour) are planned for
+  version 1.0.1. They don't block review. See `ANDROID-FUTURE-RELEASES.md`.
+- **Web fixes: live.** The eight bugs in `TEAM-HANDOFF.md` §3 (web `b3df936`) are on Vercel and Cloud Run, as of
+  28 Sep evening. That includes the fuller deletion text inside the app and no ₹50 in the upload errors.
+- **Privacy promises: partly fixed, and what's fixed is live.** Done: a closed seller's listings and photos are
   erased, complaints lose the name and phone (`6946caa`, `d523457`), and the policy's agree button confirms 18+
   (`9e91006`). Dated backup copies now prune themselves after 12 months, and the policy says so (`e067987`), but
   the review table's Backups row isn't marked Done yet. Still open: stray fields (`landmark`, `fssai`,
   `shopSlug`, `closeNote`), hosting logs, GitHub in the provider list, security-log pruning, and the ₹50 payer UPI
-  ID. Deploy the backend before submitting, and re-check the table in `PLAY-READINESS-REVIEW.md` → "Privacy
-  policy and Data safety form vs the code".
+  ID. The API running today includes all the fixes above. Re-check the table in `PLAY-READINESS-REVIEW.md` →
+  "Privacy policy and Data safety form vs the code" before submitting.
 - **No ₹50 fee flow inside the APK** (web `77110fa`). Inside the app, sellers see only their shop's status, never
   the price, QR or UTR form. They pay at the college desk and staff record it. This keeps the seller fee outside
   Play Billing. The reviewer won't see a payment screen in the app.
@@ -177,11 +186,12 @@ Choose **All or some functionality is restricted**. Then click **Add instruction
 | Field | Enter |
 |---|---|
 | Name | `Buyer and seller login (same number)` |
-| Username / phone | `9579642050` |
+| Username / phone | **⚠** the demo number you picked in §0: `9579642050` or `9999999999` |
 | Password / OTP | **⚠** the fixed OTP you set in MSG91 |
 | Any other information | paste below |
 
-487 characters (limit 500):
+487 characters (limit 500). If you picked `9999999999`, change the number in step 2. Both are ten digits, so
+the length stays the same:
 ```
 Demo number, no SMS: use the code above.
 

@@ -36,28 +36,27 @@ in this repo, `ANDROID-WRAPPER-HANDOFF.md`.
   (`sub-main` at `6be6235`, pushed).
 - Upload keystore created (27 Sep). A signed release bundle was built on 28 Sep from `6be6235`:
   `android\app\build\outputs\bundle\release\app-release.aab` on the main laptop. **Not uploaded to Play yet.**
-- Web app: nearly all Play-readiness work is done and pushed to `prathamesh2`, so Vercel has it.
+- Web app: nearly all Play-readiness work is done and pushed to `prathamesh2`, including the eight
+  bug fixes in §3.
+- **Live, checked on the evening of 28 Sep:**
+  - Vercel serves the fixed site: the new strings are in the live bundle, and `--btn-h` is 56px.
+  - Cloud Run serves an API with `b3df936`: the public catalogue returns sellers' FSSAI numbers,
+    which only that commit adds.
+  - Whether the API also has the later `03bd22a` (both demo numbers, §4 step 1) can't be seen from
+    outside. If unsure, redeploy.
 - Every Play Console answer is written out in `PLAY-CONSOLE-FILL.md` (this repo).
+- Everything is committed and pushed in both repos.
 
-**Only on the main laptop, not in git.** Ask the owner to commit and push these, or you won't have them:
-- Web repo working tree: comment and hint fixes (conflict markers inside a comment in `Auth.tsx`,
-  stale 48-hour and image-cache comments, the `npm run admin:users -- hash` hint, the
-  `backend/.env.example` header), plus a big docs refresh. It includes `PLAY-READINESS-REVIEW.md`,
-  which re-checks every status as of 28 Sep.
-- This repo: `PLAY-CONSOLE-FILL.md` is untracked; the `README.md` and `ANDROID-WRAPPER-HANDOFF.md`
-  updates are uncommitted.
-- **The upload keystore and its passwords** (`~/.gradle/gradle.properties` on that laptop). Only that
-  machine can build a release Play accepts. Elsewhere, Gradle falls back to the debug key (see `README.md`).
+**Only on the main laptop:** the upload keystore and its passwords (`~/.gradle/gradle.properties`).
+Only that machine can build a release Play accepts. Elsewhere, Gradle falls back to the debug key
+(see `README.md`).
 
-**Not verified:** whether Cloud Run is running the latest API. Many fixes are in the code, but they
-count only after the API is deployed (`docs/DEPLOY.md` §1).
-
-## 3. Web-app bugs to fix
+## 3. Web-app bugs (all fixed)
 
 **All eight are fixed** in web commit `b3df936` on `prathamesh2` (28 Sep), with tests. The owner
-made the four decisions. Vercel has the site; **the API half is live only once Cloud Run is
-deployed** (§4 step 1). No new `.aab` was needed. The notes under each heading describe the bug
-as it was, followed by what was done.
+made the four decisions. **All of it is live** on Vercel and Cloud Run (checked 28 Sep, §2), and
+typecheck plus all 638 tests pass. No new `.aab` was needed. The notes under each heading describe
+the bug as it was, followed by what was done.
 
 ### 1. The in-app deletion text says less than the privacy policy (Play risk)
 **Fixed.** Both `.apk` strings now carry the four points, and say "fees" instead of ₹50.
@@ -152,23 +151,29 @@ move it if sellers should re-accept.
 
 In order. Details are in `PLAY-CONSOLE-FILL.md` §0 and the web repo's `PLAY-READINESS-REVIEW.md`.
 
-1. **Deploy the API to Cloud Run** with everything on `prathamesh2` (includes the §3 fixes, `b3df936`).
+1. **Make sure the API has `03bd22a`.** It's deployed with `b3df936` (§2). `03bd22a` keeps both
+   demo numbers (`9579642050` and `9999999999`) in the demo world and exempt from the send limit.
+   If you're unsure, redeploy from `prathamesh2` (`docs/DEPLOY.md` §1).
 2. **Reviewer account on production:**
-   - demo shop, products and sample orders for `9579642050`;
-   - then change the MSG91 demo OTP to a random 6-digit code and put it in the App access form.
+   - pick **one** demo number for the reviewers, `9579642050` or `9999999999`. Both are MSG91 Demo
+     Credentials (no SMS is sent), but `9999999999` is refused by a check outside the web repo, so
+     test it before choosing it;
+   - set up the demo shop, products and sample orders under that number;
+   - change the MSG91 demo OTP to a random 6-digit code;
+   - put the number and the OTP in the App access form (`PLAY-CONSOLE-FILL.md` §4). The OTP never
+     goes in either repo; the web repo is public.
 3. **Remaining privacy rows** in the review's *Privacy policy and Data safety form vs the code*
    table. Its statuses were re-checked on 28 Sep; trust it over older notes.
 4. **Store graphics:** feature graphic (1024×500) and 2–8 phone screenshots. Not made yet.
 5. **Upload** the `.aab` to closed testing, from the main laptop's Play Console account (Team Zenith).
    A personal account needs 12 testers opted in for 14 days in a row before production.
 
-**Optional wrapper polish** (needs a new `.aab`; listed in `ANDROID-WRAPPER-HANDOFF.md` → *Still to do*):
-- camera and mic `uses-feature required="false"`;
-- open other sites in the phone's browser;
-- no `console.log` in release builds;
-- brand-coloured spinner.
-
-If this is done before the first upload, keep `versionCode 1`. After that, raise it for every upload.
+**Android updates after the first release.** These are planned for 1.0.1 and don't block review.
+They need a new `.aab`, and each one is written up in `ANDROID-FUTURE-RELEASES.md`:
+- camera and mic marked not required;
+- other websites opening in the phone's browser;
+- no debug logging in release builds;
+- a brand-coloured spinner.
 
 ## 5. Don't break these
 
