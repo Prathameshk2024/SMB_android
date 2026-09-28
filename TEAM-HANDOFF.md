@@ -18,7 +18,7 @@ in this repo, `ANDROID-WRAPPER-HANDOFF.md`.
 
 | | Web app (site, API, admin console) | Android wrapper (this repo) |
 |---|---|---|
-| GitHub | `Prathameshk2024/Shantai_mahila_bajar_app` | `Prathameshk2024/SMB_android` |
+| GitHub | `Prathameshk2024/SMB_web` (was `Shantai_mahila_bajar_app`; the old URL redirects) | `Prathameshk2024/SMB_android` |
 | Branch | `prathamesh2` (GitHub default; Vercel builds from it) | `sub-main` (**not** `main`, which is older) |
 | On the main laptop | `S:\Codes and Programs\Programs\Dev\SMB\Shantai_mahila_bajar_app` | `S:\…\SMB\SMB_Android_App\Android_app` |
 | Deploys to | Vercel (site + admin), Cloud Run `shantai-api` (API): `docs/DEPLOY.md` §1–2 | Google Play, package `in.shantai.mahilabazar` |
