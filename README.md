@@ -1,72 +1,96 @@
-# Welcome to your Expo app 👋
+# शांताई महिला बाजार – Android app
 
-## Release signing (Play upload key)
+The Play Store app for Shantai Mahila Bazar, a marketplace for rural women sellers
+in Maharashtra, run by Jawahar Arts, Science & Commerce College, Anadur.
 
-A release build uses the upload key when `~/.gradle/gradle.properties` (on the
-building machine, never in this repo) has:
+It is an Expo / React Native **WebView wrapper**. The whole app is
+`app/index.tsx`: one screen that loads the live site,
+`https://shantai-mahila-bajar-app-frontend.vercel.app/`, and adds what a web page
+cannot do by itself: push notifications, Android Back, reopening on the last page,
+opening UPI/WhatsApp/phone links in their apps, and Marathi error screens.
+
+Nothing of the site is bundled in, so a Vercel deploy of the web app updates the
+app too. Rebuild and upload only when this wrapper changes.
+
+The web app, its API and all business rules live in a separate repo,
+`Shantai_mahila_bajar_app` (branch `prathamesh2`).
+
+| | |
+|---|---|
+| Package name | `in.shantai.mahilabazar` (permanent since it goes to Play) |
+| Repo / branch | `github.com/Prathameshk2024/SMB_android`, branch **`sub-main`** (`main` is older) |
+| Stack | Expo SDK 54, React Native 0.81, `react-native-webview` 13.16, `expo-notifications` 0.32 |
+| Native project | `android/` is committed and hand-edited. **Never run `expo prebuild --clean`.** |
+| Firebase project | `shantaimahilabajar` (FCM for push) |
+
+## Docs in this repo
+
+- [TEAM-HANDOFF.md](TEAM-HANDOFF.md): **start here** if you are picking the work up. Where things
+  stand across both repos, the open bugs, and the steps left before Play.
+- [ANDROID-WRAPPER-HANDOFF.md](ANDROID-WRAPPER-HANDOFF.md): how the wrapper works, the push handshake
+  with the web app, permissions, status, what is left, and the rules not to break.
+- [PLAY-CONSOLE-FILL.md](PLAY-CONSOLE-FILL.md): every Play Console field, screen by screen, ready to paste.
+- [debug-download.md](debug-download.md): the download safety net.
+
+## Run it in development
+
+```bash
+npm install
+npx expo run:android      # builds and installs a debug build on a connected phone or emulator
+```
+
+Expo Go cannot run it, because it needs the native push setup. `npx expo start` only serves the JS
+to a debug build that is already installed.
+
+## Build a release
+
+From `android/`:
+
+```bash
+./gradlew bundleRelease    # .aab for Play: app/build/outputs/bundle/release/app-release.aab
+./gradlew assembleRelease  # .apk to install on a phone by hand: app/build/outputs/apk/release/
+```
+
+Raise `versionCode` in `android/app/build.gradle` for every Play upload after the first. The first
+upload uses `versionCode 1`, `versionName "1.0.0"`.
+
+### Release signing (Play upload key)
+
+The upload keystore exists (created 27 September 2026, certificate `CN=Team Zenith`,
+SHA-256 `70:5C:39:0C:…:A7:EA`). A release build uses it when `~/.gradle/gradle.properties` on the
+building machine (never this repo) has:
 
 ```properties
-SMB_UPLOAD_STORE_FILE=C:/keys/smb-upload.jks
+SMB_UPLOAD_STORE_FILE=C:/path/to/smb-upload.jks
 SMB_UPLOAD_STORE_PASSWORD=...
-SMB_UPLOAD_KEY_ALIAS=smb-upload
+SMB_UPLOAD_KEY_ALIAS=...
 SMB_UPLOAD_KEY_PASSWORD=...
 ```
 
-Make the keystore once, and back it up with its passwords somewhere safe:
+Keep a backup of the `.jks` and its passwords outside this machine. Losing them means asking Play
+support to reset the upload key.
+
+Without those properties the release build is signed with the debug key and Gradle warns
+`release is signed with the DEBUG key`; such a build installs for testing, but Play refuses it.
+Check which key signed a build:
+
+```bash
+keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab
+```
+
+To make a new keystore on another machine (only if the original is truly lost, and then with a Play
+upload-key reset):
 
 ```bash
 keytool -genkeypair -v -storetype PKCS12 -keystore smb-upload.jks -alias smb-upload -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Without those properties the release build is signed with the debug key, which
-installs for testing but which Play refuses. Check the permissions of any release
-APK with `aapt dump permissions app-release.apk`.
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Check the permissions of a build
 
 ```bash
-npm run reset-project
+# APK: aapt lives in the Android SDK's build-tools folder
+"$LOCALAPPDATA/Android/Sdk/build-tools/<version>/aapt" dump permissions app-release.apk
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+For an `.aab`, use `bundletool dump manifest --bundle app-release.aab`, or build the APK from the
+same commit and check that. The intended list is in the handoff's *Permissions* section.

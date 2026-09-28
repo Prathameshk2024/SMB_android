@@ -1,17 +1,30 @@
 # Android wrapper: handoff
 
-Condensed from a review done on 25–26 September 2026 from the web-app repo
-(`Shantai_mahila_bajar_app`, branch `prathamesh2`). Start a new session in the
-wrapper's own folder with this file, and treat everything below as findings to
-confirm, not settled fact — every claim names the line it came from.
+Started as a review done on 25–26 September 2026 from the web-app repo
+(`Shantai_mahila_bajar_app`, branch `prathamesh2`), and kept up to date since.
+**Current as of 28 September 2026, commit `6be6235` on `sub-main`.** Code
+claims name the function or line they came from; check them before relying on
+them.
+
+## Where things stand (28 September 2026)
+
+- The wrapper is done and tested on two phones (26 September).
+- Package renamed to `in.shantai.mahilabazar` (`e2ab970`), backups off and
+  mixed content blocked (`6be6235`).
+- The upload keystore exists (27 September), and a signed
+  `app-release.aab` was built on 28 September at 04:19, **after** `6be6235`,
+  so it contains every fix above. Not uploaded to Play yet.
+- The Play Console answers are ready in `PLAY-CONSOLE-FILL.md`. What blocks
+  submission is mostly web-app work (reviewer account, privacy rows); see
+  *Still to do*.
 
 ## What this project is
 
 - The Android APK for शांताई महिला बाजार (Shantai Mahila Bazar), a marketplace
   for rural women sellers in Maharashtra.
-- An **Expo / React Native WebView** wrapper. `app/index.tsx` (636 lines) is the
-  whole app. Its one screen loads the production web app over the network:
-  `https://shantai-mahila-bajar-app-frontend.vercel.app/` (`SITE_URL`, line 54).
+- An **Expo / React Native WebView** wrapper. `app/index.tsx` (about 560 lines)
+  is the whole app. Its one screen loads the production web app over the
+  network: `https://shantai-mahila-bajar-app-frontend.vercel.app/` (`SITE_URL`).
 - Nothing of the site is bundled in. A Vercel deploy of the web app is an APK
   update; the APK is rebuilt only when the wrapper itself changes.
 - Package name `in.shantai.mahilabazar` (cannot change after the first Play
@@ -23,16 +36,17 @@ confirm, not settled fact — every claim names the line it came from.
 ## Which repo and branch
 
 **Use `https://github.com/Prathameshk2024/SMB_android`, branch `sub-main`**
-(commit `0e3af60`, 26 Sept 00:34). It is the only copy with everything.
+(pushed, head `6be6235`). It is the only copy with everything.
 
 | Repo / branch | State |
 |---|---|
-| `Prathameshk2024/SMB_android` **`sub-main`** | Push notifications **and** the navigation fixes. Use this. |
-| `Prathameshk2024/SMB_android` `main` | Push, plus zoom-off and no-overscroll only. Missing the Back fix, last-page restore and sideways-drift fix. Do not build from it. |
+| `Prathameshk2024/SMB_android` **`sub-main`** | Everything below. Use this. |
+| `Prathameshk2024/SMB_android` `main` | An older point of `sub-main` (7 commits behind): no Back fix, last-page restore, drift fix, Marathi pop-ups, package rename or signing. Do not build from it. |
 | `ArpitaHanjagi/Android_App` `main` | Navigation fixes, **no push at all**. Superseded. |
 | local `appgold-main` (named in the web repo's docs) | Not found on this machine. Superseded. |
 
-`sub-main` contains (all verified in `app/index.tsx`):
+`sub-main` contains (all verified in `app/index.tsx`; line numbers are from
+`0e3af60`, so search by name):
 
 - **Back** runs `window.history.back()` via `injectJavaScript` (line 250 on),
   never `webViewRef.goBack()`. This is load-bearing: native `goBack()` does not
@@ -49,14 +63,16 @@ confirm, not settled fact — every claim names the line it came from.
 - **Push**: `orders` channel created on start (line 219), `onMessage` handler
   (line 523), `enablePush()` (line 206), tap-to-open (`tapPath`/`safePath`,
   lines 172–177), token rotation listener.
-- **Start page rule**: tapped notification > saved last page > site root.
-  `initialUrl` starts as the saved page; `getLastNotificationResponseAsync()`
-  (line 228, now with `.catch`) swaps in the notification's page and re-aims
-  `pendingUpTarget`.
-
-> Line numbers above and below refer to `0e3af60`. The 26 September follow-up
-> (see "Status after the follow-up") moved code around in `app/index.tsx`;
-> search by name, not by line.
+- **Start page rule**: tapped notification > saved last page > site root,
+  decided synchronously by `launchTarget()` before the first render (see
+  issue 5 below).
+- **External apps**: any non-web URL (`upi:`, `tel:`, `mailto:`,
+  `whatsapp:`) goes to `Linking.openURL` (`handleExternalUrl`); the manifest's
+  `<queries>` lists those schemes. No UPI app → Marathi pop-up.
+- **Hardening** (`6be6235`): `mixedContentMode="never"` (the HTTPS site cannot
+  load `http://` resources) and `android:allowBackup="false"`, set in both the
+  manifest and `app.json`, so Android never copies the WebView's storage,
+  including the login token, to Google Drive.
 
 ## The push handshake (contract with the web app)
 
@@ -150,17 +166,45 @@ in `ea8689a`: the load-error screen took half the height and Android's English
 | 7 | Cold-start tap navigates twice | Done: taps de-duplicated by notification identifier |
 | 8 | Channel settings fixed | Comment at `setNotificationChannelAsync` |
 | 9 | English pop-ups | Done: Marathi alerts, Marathi error screen with a retry button; the extra "WebView error" alert is gone |
-| 10 | Debug keystore | Gradle ready; **the keystore itself does not exist yet** (below) |
+| 10 | Debug keystore | Done: upload keystore created 27 September (`CN=Team Zenith`, SHA-256 `70:5C:39:0C:…:A7:EA`); the four `SMB_UPLOAD_*` values are in `~/.gradle/gradle.properties` on the building laptop |
 | 11 | `debug-download.md` | Rewritten |
+
+### Since then
+
+| Commit | Change |
+|---|---|
+| `8c9449c` (26 Sep) | `react-native-blob-util` uninstalled; that also drops `ACCESS_WIFI_STATE` and `DOWNLOAD_WITHOUT_NOTIFICATION`. Storage-permission blocks kept as a guard. |
+| `e2ab970` (27 Sep) | Package `com.siddharam_sutar.mywebviewapp` → `in.shantai.mahilabazar`, deep-link scheme `shantaimahilabazar`, slug `shantai-mahila-bazar`. Both `google-services.json` copies list the new app. |
+| `6be6235` (28 Sep) | `allowBackup="false"` and `mixedContentMode="never"`, the two wrapper items from the web repo's Play readiness review. |
+| — (28 Sep, 04:19) | Signed `app-release.aab` built from `6be6235` with the upload key. |
+
+The package rename and hardening have not been through the phone checklist
+again. The `.aab` has not been installed on a phone; `assembleRelease` from the
+same commit gives an APK to test with.
 
 ## Still to do
 
-1. **Create the Play upload keystore** (command in `README.md`), put the four
-   `SMB_UPLOAD_*` values in `~/.gradle/gradle.properties` on the building
-   machine, and back the `.jks` and passwords up somewhere safe. Losing them
-   means a Play support request to reset the upload key.
-2. **Release to Play**: raise `versionCode`, build signed with the upload
-   key, and run `aapt dump permissions` on that APK once more.
+1. **Upload the `.aab` to closed testing** (`versionCode 1`, `1.0.0`) and run
+   Play's 12-tester, 14-day test if the account needs it. Field-by-field
+   answers: `PLAY-CONSOLE-FILL.md`. Its section 0 lists the web-side blockers
+   (reviewer account and demo OTP, remaining privacy rows, backend deploy).
+2. **Before or with the next build**, the rest of the web review's
+   "Android wrapper" list (`docs/PLAY-READINESS-REVIEW.md`, *Should fix*):
+   - Add `<uses-feature android:name="android.hardware.camera"
+     android:required="false"/>` and the same for
+     `android.hardware.microphone`. Without them Play treats both as required
+     and hides the app from phones without a camera or mic.
+   - Open https links to other sites in the phone's browser, not inside the
+     WebView, where the only way out is Back (`onShouldStartLoadWithRequest`
+     returns `true` for every https URL today).
+   - Drop `console.log('Intercepted URL…')` and the other logging from
+     release builds.
+   - The loading spinners are blue (`#2196F3`); use the brand maroon
+     `#7b1e2e`.
+
+   Each is a new upload, so raise `versionCode` then.
+3. **Re-run the phone checklist** below on a build with the new package name,
+   and check its permissions (`aapt dump permissions`, see `README.md`).
 
 ## Keep in mind
 
@@ -171,7 +215,9 @@ in `ea8689a`: the load-error screen took half the height and Android's English
 - **Never `expo prebuild --clean`**: `android/` has hand edits (manifest
   comments and `tools:node="remove"`, release signing in `app/build.gradle`).
   A plain prebuild can also rewrite the manifest; diff `android/` after one.
-- **Keep `app.json` and `AndroidManifest.xml` permissions identical.**
+- **Keep `app.json` and `AndroidManifest.xml` permissions identical**, and
+  keep `allowBackup` `false` in both.
+- **Keep `mixedContentMode="never"`.** The site is HTTPS only.
 - **Changing the notification channel** (importance, sound) needs a new
   channel id in `app/index.tsx` and in `app.json`'s `defaultChannel`
   (`default_notification_channel_id` in the manifest).
@@ -189,8 +235,16 @@ in `ea8689a`: the load-error screen took half the height and Android's English
   match. After a package rename, delete `android/app/build/generated/autolinking`
   and `android/build/generated/autolinking`, or the cached entry point still
   imports the old package's `BuildConfig`.
-- `versionCode` is `1` in `android/app/build.gradle`; each Play upload needs
-  it raised.
+- `versionCode` is `1` in `android/app/build.gradle`, for the first upload;
+  every upload after it needs it raised.
+- **Release builds need the upload key.** Without the `SMB_UPLOAD_*`
+  properties Gradle silently falls back to the debug key (with a warning) and
+  Play refuses the file. Check with `keytool -printcert -jarfile <aab>`.
+- **The APK has no ₹50 seller-fee flow.** Since web commit `77110fa`, the site
+  hides the price, the college QR and the UTR form inside the APK (Play
+  Billing rules); sellers pay at the college desk and staff record it. Do not
+  add any payment link or bridge for it to the wrapper. The web review
+  sketches a Play Billing bridge (`billing:buy`) if that ever changes.
 - Any location permission coming back (e.g. through a new library) means a
   Play declaration form. Run `aapt` after adding any native dependency.
 - Xiaomi/Oppo/Vivo/Realme block closed-app notifications until Autostart is
