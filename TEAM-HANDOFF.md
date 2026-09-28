@@ -54,10 +54,14 @@ count only after the API is deployed (`docs/DEPLOY.md` §1).
 
 ## 3. Web-app bugs to fix
 
-All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: fix, deploy, done.
-**Do 1 and 2 before submitting to Play.** Several need the owner's decision first; those are marked.
+**All eight are fixed** in web commit `b3df936` on `prathamesh2` (28 Sep), with tests. The owner
+made the four decisions. Vercel has the site; **the API half is live only once Cloud Run is
+deployed** (§4 step 1). No new `.aab` was needed. The notes under each heading describe the bug
+as it was, followed by what was done.
 
 ### 1. The in-app deletion text says less than the privacy policy (Play risk)
+**Fixed.** Both `.apk` strings now carry the four points, and say "fees" instead of ₹50.
+
 - The APK text `del.whatStays.apk` (`frontend/src/i18n/strings.ts:150` mr, `:1014` en) mentions only orders and fees.
 - The web text `del.whatStays` (`:696`, `:1529`) also says four things the APK text leaves out:
   - reviews are kept;
@@ -68,6 +72,9 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
 - **Fix:** add those four points to both `.apk` strings, still without naming the ₹50.
 
 ### 2. ₹50 can still show inside the APK through server errors (Play risk)
+**Fixed** (first option). The upload and edit screens show `prod.slotsFullErr` / `prod.expiredErr`
+(new, with `.apk` twins) via `screens/seller/submitError.ts`. The server messages are unchanged.
+
 - `backend/src/routes/products.routes.ts` sends Marathi messages that name the price:
   - 402 slots full: "…50 रुपये भरा" (`:108`, `:250`);
   - 403 subscription expired: `EXPIRED_MR`, "₹50 भरून…" (`:70`).
@@ -81,6 +88,8 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   - Or drop the price from the server messages.
 
 ### 3. Upload wizard promises "goes live straight away"
+**Fixed.** The key is now `prod.goesForCheck` ("Goes in for checking"). `prod.willUseSlot` and the comment were reworded too.
+
 - The last screen's title is `prod.liveNow`: "लगेच प्रकाशित होईल" / "Goes live straight away"
   (`strings.ts:508`, `:1353`; used at `UploadProduct.tsx:560`).
 - Every listing waits for staff approval: `initialListingStatus()` never returns `LIVE`.
@@ -88,6 +97,9 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   toast. The comment below it ("Publishing is hers now") is stale too.
 
 ### 4. A buyer can't correct a mistyped UTR (decision)
+**Fixed.** Decision: allow it until the seller confirms (`buyerMayCorrectUtr()` in `shared/src/orderFlow.ts`).
+The order screen shows "Wrong number? Change it". A changed UTR notifies the seller again; the same one does nothing.
+
 - `POST /orders/:id/pay` (`backend/src/routes/orders.routes.ts`) accepts only `UPI_PENDING`. After
   the first submit the order is `UPI_SUBMITTED`, so a corrected UTR gets a 409.
 - The route's own comment says correcting a digit should work.
@@ -95,6 +107,9 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   seller be told again?
 
 ### 5. The phone box can keep the wrong ten digits
+**Fixed.** `phoneInput()` in `shared/src/seller.ts` (keeps up to 12 digits, then normalises). Also applied to
+the WhatsApp field in `EditProfile.tsx` and two admin phone boxes, which had the same bug.
+
 - Typing `+91 98220 11223` into the login phone field (`Auth.tsx:182-186`) keeps `9198220112`:
   - the non-digits are stripped, but the `91` stays;
   - `maxLength={10}` applies to the raw text, so the input stops there;
@@ -104,6 +119,9 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   `91` or a leading `0`, then limit to ten digits. Don't cap the raw input.
 
 ### 6. Admin can reject an approved payment, with no reason (decision)
+**Fixed.** Decision: `PENDING` only, reason required (`rejectProblem()` in `backend/src/db/payments.ts`).
+The admin CLI no longer fills in a default reason.
+
 - `POST /admin/payments/:id/reject` (`backend/src/routes/admin.routes.ts:229`) has no `PENDING`
   check; approve does have one.
 - With no reason given, it stores and sends the seller "UTR did not match the bank statement".
@@ -112,6 +130,10 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   Either way, require a reason.
 
 ### 7. FSSAI never shows on a product (decision)
+**Fixed.** Decision: show the seller's own FSSAI on her food listings (added to `PublicSeller`). The seller
+agreement and privacy policy now say buyers see it. `POLICY_VERSION` was not moved; the owner can
+move it if sellers should re-accept.
+
 - The product page shows `product.fssai` (`frontend/src/screens/customer/Browse.tsx:376`) and the
   API accepts it, but no listing form sends it.
 - The seller's own FSSAI (collected at registration) is never shown publicly, yet the seller
@@ -120,6 +142,8 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
   change the agreement's sentence.
 
 ### 8. Buttons are 54px; the design rule says 56px (decision, cosmetic)
+**Fixed.** Decision: `--btn-h` is now 56px. `MANUAL-TEST-PLAN.md` updated.
+
 - `--btn-h: 54px` (`frontend/src/styles/theme.css:95`); the rule is in `CLAUDE.md` *Design rules*
   and `docs/FEATURE-SPEC.md`.
 - **Decide:** change the token or the rule. `MANUAL-TEST-PLAN.md` already notes the gap.
@@ -128,7 +152,7 @@ All of these were confirmed in the code on 28 Sep. **None needs a new `.aab`**: 
 
 In order. Details are in `PLAY-CONSOLE-FILL.md` §0 and the web repo's `PLAY-READINESS-REVIEW.md`.
 
-1. **Deploy the API to Cloud Run** with everything on `prathamesh2`, plus bug fixes 1–2.
+1. **Deploy the API to Cloud Run** with everything on `prathamesh2` (includes the §3 fixes, `b3df936`).
 2. **Reviewer account on production:**
    - demo shop, products and sample orders for `9579642050`;
    - then change the MSG91 demo OTP to a random 6-digit code and put it in the App access form.
